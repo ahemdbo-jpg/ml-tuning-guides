@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scikit-Learn Hyperparameter Tuning Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1f35 0%, #2d3548 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 40px 20px;
+        }
+        
+        h1 {
+            font-size: 56px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ff9f40 0%, #ffd700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 159, 64, 0.3);
+            line-height: 1.2;
+        }
+        
+        .subtitle {
+            font-size: 28px;
+            color: #00d4ff;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            margin-bottom: 15px;
+        }
+        
+        .description {
+            font-size: 18px;
+            color: #8899aa;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 20px auto 0;
+        }
+        
+        .guides-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 35px;
+            margin-bottom: 50px;
+        }
+        
+        .guide-card {
+            background: linear-gradient(135deg, #1e2639 0%, #2a3142 100%);
+            border-radius: 25px;
+            padding: 40px;
+            border: 3px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            transition: all 0.3s;
+            text-decoration: none;
+            color: white;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .guide-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #00d4ff 0%, #ff9f40 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+        
+        .guide-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .guide-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 50px rgba(0, 212, 255, 0.4);
+            border-color: #00d4ff;
+        }
+        
+        .guide-icon {
+            font-size: 72px;
+            margin-bottom: 25px;
+            display: block;
+            text-align: center;
+            filter: drop-shadow(0 0 15px rgba(0, 212, 255, 0.5));
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .guide-title {
+            font-size: 32px;
+            color: #ff9f40;
+            text-shadow: 0 0 10px rgba(255, 159, 64, 0.5);
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        .guide-description {
+            color: #8899aa;
+            font-size: 17px;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .guide-features {
+            list-style: none;
+            padding: 0;
+            margin: 25px 0;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #00d4ff;
+        }
+        
+        .guide-features li {
+            color: #00d4ff;
+            font-size: 15px;
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .guide-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #00d4ff;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .guide-button {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #1a1f35;
+            padding: 15px 40px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-align: center;
+            display: block;
+            transition: all 0.3s;
+            text-decoration: none;
+            font-size: 18px;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+        
+        .guide-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(0, 212, 255, 0.6);
+        }
+        
+        .about-section {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 212, 255, 0.05) 100%);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 25px;
+            padding: 50px;
+            margin-bottom: 50px;
+            text-align: center;
+        }
+        
+        .about-section h2 {
+            font-size: 42px;
+            color: #ff9f40;
+            margin-bottom: 25px;
+            text-shadow: 0 0 15px rgba(255, 159, 64, 0.5);
+        }
+        
+        .about-content {
+            color: #8899aa;
+            font-size: 18px;
+            line-height: 1.8;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+        
+        .topic-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid #00d4ff;
+            transition: all 0.3s;
+        }
+        
+        .topic-card:hover {
+            transform: translateX(5px);
+            border-color: #ff9f40;
+        }
+        
+        .topic-card h3 {
+            color: #00d4ff;
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+        
+        .topic-card p {
+            color: #8899aa;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8899aa;
+            font-size: 15px;
+        }
+        
+        footer a {
+            color: #00d4ff;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        footer a:hover {
+            color: #ff9f40;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Scikit-Learn Hyperparameter Tuning</h1>
+            <p class="subtitle">Master ML Model Optimization</p>
+            <p class="description">
+                Complete interactive guides for hyperparameter tuning in scikit-learn. 
+                From understanding different methods to mastering every parameter - everything you need in one place!
+            </p>
+        </header>
+
+        <div class="guides-grid">
+            <!-- Guide 1: Manual vs Automated -->
+            <a href="manual_vs_automated_tuning.html" class="guide-card">
+                <span class="guide-icon">⚔️</span>
+                <h2 class="guide-title">Manual vs Automated Tuning</h2>
+                <p class="guide-description">
+                    See the dramatic difference between manual hyperparameter tuning and automated methods. 
+                    Understand why data scientists never go back to manual tuning!
+                </p>
+                <ul class="guide-features">
+                    <li>Side-by-side workflow comparison</li>
+                    <li>Time investment analysis (3-5 days vs 30 minutes!)</li>
+                    <li>Code complexity breakdown</li>
+                    <li>Interactive race animation</li>
+                    <li>Real-world results and metrics</li>
+                </ul>
+                <div class="guide-button">See The Showdown →</div>
+            </a>
+
+            <!-- Guide 2: Tuning Methods -->
+            <a href="sklearn_tuning_methods_comparison.html" class="guide-card">
+                <span class="guide-icon">🎯</span>
+                <h2 class="guide-title">Tuning Methods Comparison</h2>
+                <p class="guide-description">
+                    Complete visual comparison of all scikit-learn hyperparameter tuning methods. 
+                    Learn which method to use for your specific use case!
+                </p>
+                <ul class="guide-features">
+                    <li>GridSearchCV - Exhaustive search</li>
+                    <li>RandomizedSearchCV - Fast random sampling</li>
+                    <li>HalvingGridSearchCV - Smart elimination</li>
+                    <li>HalvingRandomSearchCV - Fastest sklearn method</li>
+                    <li>Interactive speed race & comparison table</li>
+                </ul>
+                <div class="guide-button">Compare Methods →</div>
+            </a>
+
+            <!-- Guide 3: Parameters Explained -->
+            <a href="sklearn_parameters_explained.html" class="guide-card">
+                <span class="guide-icon">🎛️</span>
+                <h2 class="guide-title">Parameters Deep Dive</h2>
+                <p class="guide-description">
+                    Comprehensive guide to every parameter in GridSearchCV and RandomizedSearchCV. 
+                    Master cv, scoring, n_jobs, n_iter, and more with examples!
+                </p>
+                <ul class="guide-features">
+                    <li>8 detailed parameter cards</li>
+                    <li>Visual demos and examples</li>
+                    <li>Pro tips for each parameter</li>
+                    <li>Common mistakes to avoid</li>
+                    <li>Recommended configurations</li>
+                </ul>
+                <div class="guide-button">Master Parameters →</div>
+            </a>
+        </div>
+
+        <div class="about-section">
+            <h2>📚 What You'll Learn</h2>
+            <p class="about-content">
+                These interactive guides cover everything from the basics of hyperparameter tuning to advanced 
+                optimization techniques. Whether you're just starting with GridSearchCV or optimizing complex 
+                machine learning pipelines, you'll find clear explanations, visual demonstrations, and practical examples.
+            </p>
+            
+            <div class="topics-grid">
+                <div class="topic-card">
+                    <h3>🔍 Grid Search</h3>
+                    <p>Master exhaustive grid search - understand when to use it, how to configure parameters, and best practices for small parameter spaces.</p>
+                </div>
+                
+                <div class="topic-card">
+                    <h3>🎲 Random Search</h3>
+                    <p>Learn efficient random sampling for large parameter spaces using distributions and statistical methods for better coverage.</p>
+                </div>
+                
+                <div class="topic-card">
+                    <h3>⚡ Halving Methods</h3>
+                    <p>Understand successive halving algorithms that eliminate poor performers early for faster hyperparameter optimization.</p>
+                </div>
+                
+                <div class="topic-card">
+                    <h3>⚙️ Parameter Mastery</h3>
+                    <p>Complete reference for cv, scoring, n_jobs, n_iter, random_state and all other critical parameters with visual examples.</p>
+                </div>
+                
+                <div class="topic-card">
+                    <h3>📊 Visual Comparisons</h3>
+                    <p>Interactive visualizations showing how each method searches the parameter space and comparative performance metrics.</p>
+                </div>
+                
+                <div class="topic-card">
+                    <h3>🎯 Decision Making</h3>
+                    <p>Learn which tuning method to choose based on your dataset size, parameter space, time constraints, and optimization goals.</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>💡 Quick Navigation</strong></p>
+            <p style="margin-top: 15px;">
+                <a href="manual_vs_automated_tuning.html">Manual vs Automated</a> • 
+                <a href="sklearn_tuning_methods_comparison.html">Methods Comparison</a> • 
+                <a href="sklearn_parameters_explained.html">Parameters Guide</a>
+            </p>
+            <p style="margin-top: 25px;">
+                Created with ❤️ for the Machine Learning community<br>
+                <span style="font-size: 13px; color: #666;">Built with HTML, CSS, and JavaScript • No frameworks • 100% interactive</span>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

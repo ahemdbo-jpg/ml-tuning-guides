@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scikit-Learn Hyperparameter Tuning Methods - Visual Comparison</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1f35 0%, #2d3548 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #ff9f40 0%, #ffd700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(255, 159, 64, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 24px;
+            color: #00d4ff;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+        
+        .methods-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .method-card {
+            background: linear-gradient(135deg, #1e2639 0%, #2a3142 100%);
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            transition: all 0.3s;
+        }
+        
+        .method-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 212, 255, 0.3);
+            border-color: #00d4ff;
+        }
+        
+        .method-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .method-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .method-icon {
+            font-size: 48px;
+            filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5));
+        }
+        
+        .method-name {
+            font-size: 28px;
+            color: #ff9f40;
+            text-shadow: 0 0 10px rgba(255, 159, 64, 0.5);
+        }
+        
+        .speed-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .speed-slow {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+            color: white;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
+        }
+        
+        .speed-medium {
+            background: linear-gradient(135deg, #ff9f40 0%, #ff7f00 100%);
+            color: #1a1f35;
+            box-shadow: 0 0 15px rgba(255, 159, 64, 0.5);
+        }
+        
+        .speed-fast {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #1a1f35;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        }
+        
+        .speed-very-fast {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #1a1f35;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+        
+        .method-description {
+            color: #8899aa;
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .strategy-visual {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+        
+        .visual-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 6px;
+            margin-top: 15px;
+        }
+        
+        .visual-cell {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .cell-tested {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+        
+        .cell-untested {
+            background: linear-gradient(135deg, #242b3d 0%, #1e2639 100%);
+        }
+        
+        .cell-random {
+            background: linear-gradient(135deg, #ff9f40 0%, #ff7f00 100%);
+            box-shadow: 0 0 10px rgba(255, 159, 64, 0.5);
+        }
+        
+        .cell-best {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+            animation: glow 2s infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .pros, .cons {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid;
+        }
+        
+        .pros {
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+        
+        .cons {
+            border-color: rgba(255, 107, 107, 0.3);
+        }
+        
+        .pros h4 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+            font-size: 16px;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+        
+        .cons h4 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            font-size: 16px;
+            text-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
+        }
+        
+        .pros ul, .cons ul {
+            list-style: none;
+            color: #8899aa;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        
+        .pros li::before {
+            content: '✓';
+            color: #00d4ff;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .cons li::before {
+            content: '✗';
+            color: #ff6b6b;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .use-cases {
+            background: linear-gradient(135deg, rgba(255, 159, 64, 0.1) 0%, rgba(255, 159, 64, 0.05) 100%);
+            border: 2px solid rgba(255, 159, 64, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .use-cases h4 {
+            color: #ff9f40;
+            margin-bottom: 10px;
+            font-size: 16px;
+            text-shadow: 0 0 10px rgba(255, 159, 64, 0.3);
+        }
+        
+        .use-cases ul {
+            list-style: none;
+            color: #00d4ff;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        
+        .use-cases li::before {
+            content: '→';
+            color: #ff9f40;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .comparison-table-section {
+            background: linear-gradient(135deg, #1e2639 0%, #2a3142 100%);
+            border-radius: 20px;
+            padding: 40px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            font-size: 36px;
+            color: #ff9f40;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 0 15px rgba(255, 159, 64, 0.5);
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .comparison-table th {
+            background: linear-gradient(135deg, #ff9f40 0%, #ff7f00 100%);
+            color: #1a1f35;
+            padding: 15px;
+            text-align: left;
+            font-size: 16px;
+            font-weight: 700;
+        }
+        
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            color: #8899aa;
+            font-size: 15px;
+        }
+        
+        .comparison-table tr:hover {
+            background: rgba(0, 212, 255, 0.05);
+        }
+        
+        .comparison-table .method-col {
+            color: #00d4ff;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .rating {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .star {
+            color: #ffd700;
+            font-size: 18px;
+        }
+        
+        .star-empty {
+            color: #333;
+            font-size: 18px;
+        }
+        
+        .code-example-section {
+            background: linear-gradient(135deg, #1e2639 0%, #2a3142 100%);
+            border-radius: 20px;
+            padding: 40px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        
+        .code-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .code-tab {
+            background: linear-gradient(135deg, #242b3d 0%, #1e2639 100%);
+            color: #00d4ff;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .code-tab:hover {
+            border-color: #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+        
+        .code-tab.active {
+            background: linear-gradient(135deg, #ff9f40 0%, #ff7f00 100%);
+            border-color: #ff9f40;
+            color: #1a1f35;
+            box-shadow: 0 0 20px rgba(255, 159, 64, 0.5);
+        }
+        
+        .code-content {
+            display: none;
+        }
+        
+        .code-content.active {
+            display: block;
+        }
+        
+        .code-block {
+            background: #0d1117;
+            border-radius: 10px;
+            padding: 20px;
+            overflow-x: auto;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+        
+        .code-block pre {
+            color: #c9d1d9;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        .code-block .keyword {
+            color: #ff7b72;
+        }
+        
+        .code-block .string {
+            color: #a5d6ff;
+        }
+        
+        .code-block .comment {
+            color: #8b949e;
+        }
+        
+        .code-block .function {
+            color: #d2a8ff;
+        }
+        
+        .code-block .number {
+            color: #79c0ff;
+        }
+        
+        .interactive-demo-section {
+            background: linear-gradient(135deg, #1e2639 0%, #2a3142 100%);
+            border-radius: 20px;
+            padding: 40px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            margin-top: 40px;
+        }
+        
+        .demo-controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .demo-button {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #1a1f35;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+        
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.5);
+        }
+        
+        .demo-button.reset {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+            color: white;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        
+        .demo-method {
+            background: linear-gradient(135deg, #242b3d 0%, #1e2639 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+        }
+        
+        .demo-method h4 {
+            color: #ff9f40;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 18px;
+        }
+        
+        .demo-visual-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            margin-bottom: 15px;
+        }
+        
+        .demo-stats {
+            color: #8899aa;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .demo-stats .highlight {
+            color: #00d4ff;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        .decision-tree {
+            background: linear-gradient(135deg, rgba(255, 159, 64, 0.1) 0%, rgba(255, 159, 64, 0.05) 100%);
+            border: 2px solid rgba(255, 159, 64, 0.3);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+        
+        .decision-tree h3 {
+            color: #ff9f40;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 28px;
+            text-shadow: 0 0 10px rgba(255, 159, 64, 0.5);
+        }
+        
+        .decision-node {
+            background: linear-gradient(135deg, #242b3d 0%, #1e2639 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .decision-question {
+            color: #00d4ff;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .decision-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .decision-option {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 159, 64, 0.3);
+        }
+        
+        .decision-option strong {
+            color: #ff9f40;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .decision-option span {
+            color: #8899aa;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔬 Scikit-Learn Hyperparameter Tuning Methods</h1>
+            <p class="subtitle">Complete Visual Comparison & Guide</p>
+        </header>
+
+        <!-- Method Cards -->
+        <div class="methods-grid">
+            <!-- GridSearchCV -->
+            <div class="method-card">
+                <div class="method-header">
+                    <div class="method-title">
+                        <div class="method-icon">🔍</div>
+                        <h2 class="method-name">GridSearchCV</h2>
+                    </div>
+                    <div class="speed-badge speed-slow">🐢 Slow</div>
+                </div>
+                
+                <p class="method-description">
+                    The <strong>exhaustive searcher</strong>. Tests every single combination in your parameter grid. 
+                    Guaranteed to find the absolute best parameters, but can be very time-consuming.
+                </p>
+                
+                <div class="strategy-visual">
+                    <h4 style="color: #00d4ff; margin-bottom: 10px;">Search Strategy: Test ALL combinations</h4>
+                    <div class="visual-grid" id="grid-visual">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="pros-cons">
+                    <div class="pros">
+                        <h4>✓ Pros</h4>
+                        <ul>
+                            <li>Guaranteed best result</li>
+                            <li>Systematic & reproducible</li>
+                            <li>Built-in cross-validation</li>
+                            <li>Easy to understand</li>
+                        </ul>
+                    </div>
+                    <div class="cons">
+                        <h4>✗ Cons</h4>
+                        <ul>
+                            <li>Very slow for large grids</li>
+                            <li>Exponential time complexity</li>
+                            <li>Wastes time on bad areas</li>
+                            <li>Limited by discrete values</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="use-cases">
+                    <h4>💡 Best Used When:</h4>
+                    <ul>
+                        <li>Small parameter space (< 100 combinations)</li>
+                        <li>You need the guaranteed best result</li>
+                        <li>Computational resources aren't limited</li>
+                        <li>Parameters are few (2-3 hyperparameters)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- RandomizedSearchCV -->
+            <div class="method-card">
+                <div class="method-header">
+                    <div class="method-title">
+                        <div class="method-icon">🎲</div>
+                        <h2 class="method-name">RandomizedSearchCV</h2>
+                    </div>
+                    <div class="speed-badge speed-fast">🚀 Fast</div>
+                </div>
+                
+                <p class="method-description">
+                    The <strong>smart sampler</strong>. Randomly samples from parameter distributions. 
+                    Often finds near-optimal solutions much faster than grid search.
+                </p>
+                
+                <div class="strategy-visual">
+                    <h4 style="color: #ff9f40; margin-bottom: 10px;">Search Strategy: Sample RANDOM combinations</h4>
+                    <div class="visual-grid" id="random-visual">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="pros-cons">
+                    <div class="pros">
+                        <h4>✓ Pros</h4>
+                        <ul>
+                            <li>Much faster than Grid</li>
+                            <li>Explores continuous distributions</li>
+                            <li>Good for large spaces</li>
+                            <li>Often finds near-optimal</li>
+                        </ul>
+                    </div>
+                    <div class="cons">
+                        <h4>✗ Cons</h4>
+                        <ul>
+                            <li>Not guaranteed best</li>
+                            <li>Results can vary</li>
+                            <li>May miss optimal region</li>
+                            <li>Needs more iterations</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="use-cases">
+                    <h4>💡 Best Used When:</h4>
+                    <ul>
+                        <li>Large parameter space (> 100 combinations)</li>
+                        <li>Limited time or compute budget</li>
+                        <li>Many hyperparameters (5+)</li>
+                        <li>"Good enough" is acceptable</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- HalvingGridSearchCV -->
+            <div class="method-card">
+                <div class="method-header">
+                    <div class="method-title">
+                        <div class="method-icon">⚡</div>
+                        <h2 class="method-name">HalvingGridSearchCV</h2>
+                    </div>
+                    <div class="speed-badge speed-medium">⚡ Medium</div>
+                </div>
+                
+                <p class="method-description">
+                    The <strong>tournament organizer</strong>. Starts with all combinations using minimal resources, 
+                    then successively eliminates poor performers while increasing resources for survivors.
+                </p>
+                
+                <div class="strategy-visual">
+                    <h4 style="color: #00d4ff; margin-bottom: 10px;">Search Strategy: Successive HALVING elimination</h4>
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="color: #8899aa; font-size: 14px; line-height: 2;">
+                            Round 1: Test all 50 combinations (10% data)<br>
+                            ↓ Eliminate worst 2/3<br>
+                            Round 2: Test best 16 combinations (30% data)<br>
+                            ↓ Eliminate worst 2/3<br>
+                            Round 3: Test best 5 combinations (100% data)<br>
+                            ↓<br>
+                            <span style="color: #ffd700; font-size: 16px; font-weight: 700;">🏆 Winner!</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pros-cons">
+                    <div class="pros">
+                        <h4>✓ Pros</h4>
+                        <ul>
+                            <li>Faster than GridSearch</li>
+                            <li>Eliminates bad options early</li>
+                            <li>Still exhaustive search</li>
+                            <li>Efficient resource use</li>
+                        </ul>
+                    </div>
+                    <div class="cons">
+                        <h4>✗ Cons</h4>
+                        <ul>
+                            <li>Complex to configure</li>
+                            <li>May eliminate good options early</li>
+                            <li>Requires scikit-learn 0.24+</li>
+                            <li>Not all models supported</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="use-cases">
+                    <h4>💡 Best Used When:</h4>
+                    <ul>
+                        <li>Medium parameter space (50-500 combinations)</li>
+                        <li>Large dataset available</li>
+                        <li>Want systematic search faster</li>
+                        <li>Model training is expensive</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- HalvingRandomSearchCV -->
+            <div class="method-card">
+                <div class="method-header">
+                    <div class="method-title">
+                        <div class="method-icon">🚀</div>
+                        <h2 class="method-name">HalvingRandomSearchCV</h2>
+                    </div>
+                    <div class="speed-badge speed-very-fast">⚡⚡ Very Fast</div>
+                </div>
+                
+                <p class="method-description">
+                    The <strong>speed champion</strong>. Combines random sampling with successive halving. 
+                    The fastest method for very large parameter spaces.
+                </p>
+                
+                <div class="strategy-visual">
+                    <h4 style="color: #ffd700; margin-bottom: 10px;">Search Strategy: RANDOM samples + HALVING</h4>
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="color: #8899aa; font-size: 14px; line-height: 2;">
+                            🎲 Randomly sample 100 combinations<br>
+                            ↓<br>
+                            Round 1: Test 100 (10% data)<br>
+                            ↓ Eliminate worst 2/3<br>
+                            Round 2: Test best 33 (30% data)<br>
+                            ↓ Eliminate worst 2/3<br>
+                            Round 3: Test best 11 (100% data)<br>
+                            ↓<br>
+                            <span style="color: #ffd700; font-size: 16px; font-weight: 700;">🏆 Winner!</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pros-cons">
+                    <div class="pros">
+                        <h4>✓ Pros</h4>
+                        <ul>
+                            <li>Fastest of all methods</li>
+                            <li>Great for huge spaces</li>
+                            <li>Combines best of both</li>
+                            <li>Efficient early stopping</li>
+                        </ul>
+                    </div>
+                    <div class="cons">
+                        <h4>✗ Cons</h4>
+                        <ul>
+                            <li>Most complex to use</li>
+                            <li>Results vary more</li>
+                            <li>Requires careful tuning</li>
+                            <li>Newest/least tested</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="use-cases">
+                    <h4>💡 Best Used When:</h4>
+                    <ul>
+                        <li>Very large parameter space (1000+ combinations)</li>
+                        <li>Severe time/compute constraints</li>
+                        <li>Many hyperparameters (10+)</li>
+                        <li>Initial exploration phase</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="comparison-table-section">
+            <h2 class="section-title">📊 Side-by-Side Comparison</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>Speed</th>
+                        <th>Completeness</th>
+                        <th>Best For</th>
+                        <th>Typical Time (100 combos)</th>
+                        <th>Scikit-Learn Version</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="method-col">GridSearchCV</td>
+                        <td>
+                            <div class="rating">
+                                <span class="star">★</span>
+                                <span class="star-empty">★</span>
+                                <span class="star-empty">★</span>
+                                <span class="star-empty">★</span>
+                                <span class="star-empty">★</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="rating">
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                            </div>
+                        </td>
+                        <td>Small spaces, guaranteed best</td>
+                        <td>~30 minutes</td>
+                        <td>All versions</td>
+                    </tr>
+                    <tr>
+                        <td class="method-col">RandomizedSearchCV</td>
+                        <td>
+                            <div class="rating">
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star-empty">★</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="rating">
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star-empty">★</span>
+                                <span class="star-empty">★</span>
+                            </div>
+                        </td>
+                        <td>Large spaces, time-limited</td>
+                        <td>~3 minutes (10 samples)</td>
+                        <td>All versions</td>
+                    </tr>
+                    <tr>
+                        <td class="method-col">HalvingGridSearchCV</td>
+                        <td>
+                            <div class="rating">
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star-empty">★</span>
+                                <span class="star-empty">★</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="rating">
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                            </div>
+                        </td>
+                        <td>Medium spaces, systematic</td>
+                        <td>~10 minutes</td>
+                        <td>0.24+</td>
+                    </tr>
+                    <tr>
+                        <td class="method-col">HalvingRandomSearchCV</td>
+                        <td>
+                            <div class="rating">
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="rating">
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star-empty">★</span>
+                                <span class="star-empty">★</span>
+                            </div>
+                        </td>
+                        <td>Huge spaces, fastest</td>
+                        <td>~2 minutes</td>
+                        <td>0.24+</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Decision Tree -->
+            <div class="decision-tree">
+                <h3>🤔 Which Method Should You Use?</h3>
+                
+                <div class="decision-node">
+                    <div class="decision-question">How many hyperparameters are you tuning?</div>
+                    <div class="decision-options">
+                        <div class="decision-option">
+                            <strong>1-3 parameters (< 100 combos)</strong>
+                            <span>→ Use <span style="color: #00d4ff;">GridSearchCV</span></span>
+                        </div>
+                        <div class="decision-option">
+                            <strong>4+ parameters (> 100 combos)</strong>
+                            <span>→ Continue below ↓</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="decision-node">
+                    <div class="decision-question">How much time/compute do you have?</div>
+                    <div class="decision-options">
+                        <div class="decision-option">
+                            <strong>Plenty of time</strong>
+                            <span>→ Use <span style="color: #00d4ff;">HalvingGridSearchCV</span></span>
+                        </div>
+                        <div class="decision-option">
+                            <strong>Limited time</strong>
+                            <span>→ Continue below ↓</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="decision-node">
+                    <div class="decision-question">Need guaranteed best or "good enough"?</div>
+                    <div class="decision-options">
+                        <div class="decision-option">
+                            <strong>Guaranteed best</strong>
+                            <span>→ Use <span style="color: #00d4ff;">HalvingGridSearchCV</span></span>
+                        </div>
+                        <div class="decision-option">
+                            <strong>Good enough is fine</strong>
+                            <span>→ Use <span style="color: #ffd700;">RandomizedSearchCV</span> or <span style="color: #ffd700;">HalvingRandomSearchCV</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Code Examples -->
+        <div class="code-example-section">
+            <h2 class="section-title">💻 Code Examples</h2>
+            
+            <div class="code-tabs">
+                <div class="code-tab active" onclick="showCode('grid')">GridSearchCV</div>
+                <div class="code-tab" onclick="showCode('random')">RandomizedSearchCV</div>
+                <div class="code-tab" onclick="showCode('halving-grid')">HalvingGridSearchCV</div>
+                <div class="code-tab" onclick="showCode('halving-random')">HalvingRandomSearchCV</div>
+            </div>
+
+            <div id="code-grid" class="code-content active">
+                <div class="code-block">
+                    <pre><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> GridSearchCV
+<span class="keyword">from</span> sklearn.ensemble <span class="keyword">import</span> RandomForestClassifier
+
+<span class="comment"># Define parameter grid</span>
+param_grid = {
+    <span class="string">'n_estimators'</span>: [<span class="number">50</span>, <span class="number">100</span>, <span class="number">200</span>],
+    <span class="string">'max_depth'</span>: [<span class="number">5</span>, <span class="number">10</span>, <span class="number">15</span>, <span class="number">20</span>],
+    <span class="string">'min_samples_split'</span>: [<span class="number">2</span>, <span class="number">5</span>, <span class="number">10</span>]
+}
+
+<span class="comment"># Create GridSearchCV</span>
+grid_search = <span class="function">GridSearchCV</span>(
+    estimator=<span class="function">RandomForestClassifier</span>(),
+    param_grid=param_grid,
+    cv=<span class="number">5</span>,                    <span class="comment"># 5-fold cross-validation</span>
+    scoring=<span class="string">'accuracy'</span>,
+    n_jobs=-<span class="number">1</span>,              <span class="comment"># Use all CPU cores</span>
+    verbose=<span class="number">2</span>
+)
+
+<span class="comment"># Fit and find best parameters</span>
+grid_search.<span class="function">fit</span>(X_train, y_train)
+
+<span class="comment"># Results</span>
+<span class="function">print</span>(<span class="string">"Best Parameters:"</span>, grid_search.best_params_)
+<span class="function">print</span>(<span class="string">"Best Score:"</span>, grid_search.best_score_)
+best_model = grid_search.best_estimator_</pre>
+                </div>
+            </div>
+
+            <div id="code-random" class="code-content">
+                <div class="code-block">
+                    <pre><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> RandomizedSearchCV
+<span class="keyword">from</span> scipy.stats <span class="keyword">import</span> randint, uniform
+
+<span class="comment"># Define parameter distributions</span>
+param_distributions = {
+    <span class="string">'n_estimators'</span>: <span class="function">randint</span>(<span class="number">50</span>, <span class="number">500</span>),           <span class="comment"># Random integers</span>
+    <span class="string">'max_depth'</span>: <span class="function">randint</span>(<span class="number">5</span>, <span class="number">50</span>),
+    <span class="string">'min_samples_split'</span>: <span class="function">randint</span>(<span class="number">2</span>, <span class="number">20</span>),
+    <span class="string">'max_features'</span>: <span class="function">uniform</span>(<span class="number">0.1</span>, <span class="number">0.9</span>)          <span class="comment"># Random floats</span>
+}
+
+<span class="comment"># Create RandomizedSearchCV</span>
+random_search = <span class="function">RandomizedSearchCV</span>(
+    estimator=<span class="function">RandomForestClassifier</span>(),
+    param_distributions=param_distributions,
+    n_iter=<span class="number">100</span>,             <span class="comment"># Number of random combinations</span>
+    cv=<span class="number">5</span>,
+    scoring=<span class="string">'accuracy'</span>,
+    n_jobs=-<span class="number">1</span>,
+    random_state=<span class="number">42</span>,
+    verbose=<span class="number">2</span>
+)
+
+<span class="comment"># Fit and find best parameters</span>
+random_search.<span class="function">fit</span>(X_train, y_train)
+
+<span class="function">print</span>(<span class="string">"Best Parameters:"</span>, random_search.best_params_)
+<span class="function">print</span>(<span class="string">"Best Score:"</span>, random_search.best_score_)</pre>
+                </div>
+            </div>
+
+            <div id="code-halving-grid" class="code-content">
+                <div class="code-block">
+                    <pre><span class="keyword">from</span> sklearn.experimental <span class="keyword">import</span> enable_halving_search_cv
+<span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> HalvingGridSearchCV
+
+<span class="comment"># Define parameter grid</span>
+param_grid = {
+    <span class="string">'n_estimators'</span>: [<span class="number">50</span>, <span class="number">100</span>, <span class="number">200</span>],
+    <span class="string">'max_depth'</span>: [<span class="number">5</span>, <span class="number">10</span>, <span class="number">15</span>, <span class="number">20</span>],
+    <span class="string">'min_samples_split'</span>: [<span class="number">2</span>, <span class="number">5</span>, <span class="number">10</span>]
+}
+
+<span class="comment"># Create HalvingGridSearchCV</span>
+halving_search = <span class="function">HalvingGridSearchCV</span>(
+    estimator=<span class="function">RandomForestClassifier</span>(),
+    param_grid=param_grid,
+    factor=<span class="number">3</span>,               <span class="comment"># Reduce candidates by 1/3 each iteration</span>
+    resource=<span class="string">'n_samples'</span>,   <span class="comment"># Increase training data each round</span>
+    max_resources=<span class="string">'auto'</span>,
+    cv=<span class="number">5</span>,
+    scoring=<span class="string">'accuracy'</span>,
+    n_jobs=-<span class="number">1</span>,
+    verbose=<span class="number">2</span>
+)
+
+<span class="comment"># Fit and find best parameters</span>
+halving_search.<span class="function">fit</span>(X_train, y_train)
+
+<span class="function">print</span>(<span class="string">"Best Parameters:"</span>, halving_search.best_params_)
+<span class="function">print</span>(<span class="string">"Best Score:"</span>, halving_search.best_score_)</pre>
+                </div>
+            </div>
+
+            <div id="code-halving-random" class="code-content">
+                <div class="code-block">
+                    <pre><span class="keyword">from</span> sklearn.experimental <span class="keyword">import</span> enable_halving_search_cv
+<span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> HalvingRandomSearchCV
+<span class="keyword">from</span> scipy.stats <span class="keyword">import</span> randint, uniform
+
+<span class="comment"># Define parameter distributions</span>
+param_distributions = {
+    <span class="string">'n_estimators'</span>: <span class="function">randint</span>(<span class="number">50</span>, <span class="number">500</span>),
+    <span class="string">'max_depth'</span>: <span class="function">randint</span>(<span class="number">5</span>, <span class="number">50</span>),
+    <span class="string">'min_samples_split'</span>: <span class="function">randint</span>(<span class="number">2</span>, <span class="number">20</span>),
+    <span class="string">'max_features'</span>: <span class="function">uniform</span>(<span class="number">0.1</span>, <span class="number">0.9</span>)
+}
+
+<span class="comment"># Create HalvingRandomSearchCV</span>
+halving_random = <span class="function">HalvingRandomSearchCV</span>(
+    estimator=<span class="function">RandomForestClassifier</span>(),
+    param_distributions=param_distributions,
+    factor=<span class="number">3</span>,
+    resource=<span class="string">'n_samples'</span>,
+    n_candidates=<span class="string">'exhaust'</span>,  <span class="comment"># Use all available candidates</span>
+    cv=<span class="number">5</span>,
+    scoring=<span class="string">'accuracy'</span>,
+    n_jobs=-<span class="number">1</span>,
+    random_state=<span class="number">42</span>,
+    verbose=<span class="number">2</span>
+)
+
+<span class="comment"># Fit and find best parameters</span>
+halving_random.<span class="function">fit</span>(X_train, y_train)
+
+<span class="function">print</span>(<span class="string">"Best Parameters:"</span>, halving_random.best_params_)
+<span class="function">print</span>(<span class="string">"Best Score:"</span>, halving_random.best_score_)</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Demo -->
+        <div class="interactive-demo-section">
+            <h2 class="section-title">🎮 Interactive Speed Comparison</h2>
+            <p style="text-align: center; color: #8899aa; margin-bottom: 30px; font-size: 18px;">
+                Watch all four methods search through a 25-parameter space simultaneously!
+            </p>
+
+            <div class="demo-controls">
+                <button class="demo-button" onclick="startDemo()">▶️ Start Race</button>
+                <button class="demo-button reset" onclick="resetDemo()">🔄 Reset</button>
+            </div>
+
+            <div class="demo-grid">
+                <div class="demo-method">
+                    <h4>🔍 GridSearchCV</h4>
+                    <div class="demo-visual-grid" id="demo-grid"></div>
+                    <div class="demo-stats">
+                        Tested: <span class="highlight" id="demo-grid-count">0/25</span><br>
+                        Best: <span class="highlight" id="demo-grid-best">-</span>
+                    </div>
+                </div>
+
+                <div class="demo-method">
+                    <h4>🎲 RandomizedSearchCV</h4>
+                    <div class="demo-visual-grid" id="demo-random"></div>
+                    <div class="demo-stats">
+                        Tested: <span class="highlight" id="demo-random-count">0/10</span><br>
+                        Best: <span class="highlight" id="demo-random-best">-</span>
+                    </div>
+                </div>
+
+                <div class="demo-method">
+                    <h4>⚡ HalvingGridSearchCV</h4>
+                    <div class="demo-visual-grid" id="demo-halving-grid"></div>
+                    <div class="demo-stats">
+                        Tested: <span class="highlight" id="demo-halving-grid-count">0/25</span><br>
+                        Best: <span class="highlight" id="demo-halving-grid-best">-</span>
+                    </div>
+                </div>
+
+                <div class="demo-method">
+                    <h4>🚀 HalvingRandomSearchCV</h4>
+                    <div class="demo-visual-grid" id="demo-halving-random"></div>
+                    <div class="demo-stats">
+                        Tested: <span class="highlight" id="demo-halving-random-count">0/10</span><br>
+                        Best: <span class="highlight" id="demo-halving-random-best">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize visual grids
+        function initializeVisuals() {
+            // GridSearchCV - all cells tested
+            const gridVisual = document.getElementById('grid-visual');
+            for (let i = 0; i < 50; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'visual-cell cell-tested';
+                gridVisual.appendChild(cell);
+            }
+
+            // RandomizedSearchCV - random cells tested
+            const randomVisual = document.getElementById('random-visual');
+            const testedIndices = new Set();
+            while (testedIndices.size < 15) {
+                testedIndices.add(Math.floor(Math.random() * 50));
+            }
+            
+            for (let i = 0; i < 50; i++) {
+                const cell = document.createElement('div');
+                cell.className = testedIndices.has(i) ? 'visual-cell cell-random' : 'visual-cell cell-untested';
+                randomVisual.appendChild(cell);
+            }
+
+            // Add best cell to both
+            if (gridVisual.children.length > 0) {
+                gridVisual.children[23].classList.add('cell-best');
+            }
+            if (randomVisual.children.length > 0 && testedIndices.has(27)) {
+                randomVisual.children[27].classList.add('cell-best');
+            }
+        }
+
+        // Code tab switching
+        function showCode(method) {
+            document.querySelectorAll('.code-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.code-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`code-${method}`).classList.add('active');
+        }
+
+        // Interactive Demo
+        let demoRunning = false;
+        let demoIntervals = [];
+
+        function initializeDemo() {
+            const methods = ['grid', 'random', 'halving-grid', 'halving-random'];
+            methods.forEach(method => {
+                const grid = document.getElementById(`demo-${method}`);
+                grid.innerHTML = '';
+                for (let i = 0; i < 25; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'visual-cell cell-untested';
+                    grid.appendChild(cell);
+                }
+            });
+        }
+
+        function startDemo() {
+            if (demoRunning) return;
+            demoRunning = true;
+            
+            // GridSearchCV - tests all, slowest
+            let gridCell = 0;
+            let gridBest = 0;
+            const gridInterval = setInterval(() => {
+                if (gridCell < 25) {
+                    const cells = document.querySelectorAll('#demo-grid .visual-cell');
+                    const score = Math.floor(Math.random() * 30 + 60);
+                    cells[gridCell].classList.remove('cell-untested');
+                    cells[gridCell].classList.add('cell-tested');
+                    
+                    if (score > gridBest) {
+                        document.querySelectorAll('#demo-grid .cell-best').forEach(c => c.classList.remove('cell-best'));
+                        cells[gridCell].classList.add('cell-best');
+                        gridBest = score;
+                        document.getElementById('demo-grid-best').textContent = score + '%';
+                    }
+                    
+                    gridCell++;
+                    document.getElementById('demo-grid-count').textContent = gridCell + '/25';
+                } else {
+                    clearInterval(gridInterval);
+                }
+            }, 400);
+            demoIntervals.push(gridInterval);
+
+            // RandomizedSearchCV - tests 10 random
+            let randomCell = 0;
+            let randomBest = 0;
+            const randomIndices = [];
+            while (randomIndices.length < 10) {
+                const idx = Math.floor(Math.random() * 25);
+                if (!randomIndices.includes(idx)) randomIndices.push(idx);
+            }
+            
+            const randomInterval = setInterval(() => {
+                if (randomCell < 10) {
+                    const cells = document.querySelectorAll('#demo-random .visual-cell');
+                    const idx = randomIndices[randomCell];
+                    const score = Math.floor(Math.random() * 30 + 60);
+                    cells[idx].classList.remove('cell-untested');
+                    cells[idx].classList.add('cell-random');
+                    
+                    if (score > randomBest) {
+                        document.querySelectorAll('#demo-random .cell-best').forEach(c => c.classList.remove('cell-best'));
+                        cells[idx].classList.add('cell-best');
+                        randomBest = score;
+                        document.getElementById('demo-random-best').textContent = score + '%';
+                    }
+                    
+                    randomCell++;
+                    document.getElementById('demo-random-count').textContent = randomCell + '/10';
+                } else {
+                    clearInterval(randomInterval);
+                }
+            }, 500);
+            demoIntervals.push(randomInterval);
+
+            // HalvingGridSearchCV - faster than grid
+            let halvingGridCell = 0;
+            let halvingGridBest = 0;
+            const halvingGridInterval = setInterval(() => {
+                if (halvingGridCell < 25) {
+                    const cells = document.querySelectorAll('#demo-halving-grid .visual-cell');
+                    const score = Math.floor(Math.random() * 30 + 60);
+                    cells[halvingGridCell].classList.remove('cell-untested');
+                    cells[halvingGridCell].classList.add('cell-tested');
+                    
+                    if (score > halvingGridBest) {
+                        document.querySelectorAll('#demo-halving-grid .cell-best').forEach(c => c.classList.remove('cell-best'));
+                        cells[halvingGridCell].classList.add('cell-best');
+                        halvingGridBest = score;
+                        document.getElementById('demo-halving-grid-best').textContent = score + '%';
+                    }
+                    
+                    halvingGridCell++;
+                    document.getElementById('demo-halving-grid-count').textContent = halvingGridCell + '/25';
+                } else {
+                    clearInterval(halvingGridInterval);
+                }
+            }, 250);
+            demoIntervals.push(halvingGridInterval);
+
+            // HalvingRandomSearchCV - fastest
+            let halvingRandomCell = 0;
+            let halvingRandomBest = 0;
+            const halvingRandomIndices = [];
+            while (halvingRandomIndices.length < 10) {
+                const idx = Math.floor(Math.random() * 25);
+                if (!halvingRandomIndices.includes(idx)) halvingRandomIndices.push(idx);
+            }
+            
+            const halvingRandomInterval = setInterval(() => {
+                if (halvingRandomCell < 10) {
+                    const cells = document.querySelectorAll('#demo-halving-random .visual-cell');
+                    const idx = halvingRandomIndices[halvingRandomCell];
+                    const score = Math.floor(Math.random() * 30 + 60);
+                    cells[idx].classList.remove('cell-untested');
+                    cells[idx].classList.add('cell-random');
+                    
+                    if (score > halvingRandomBest) {
+                        document.querySelectorAll('#demo-halving-random .cell-best').forEach(c => c.classList.remove('cell-best'));
+                        cells[idx].classList.add('cell-best');
+                        halvingRandomBest = score;
+                        document.getElementById('demo-halving-random-best').textContent = score + '%';
+                    }
+                    
+                    halvingRandomCell++;
+                    document.getElementById('demo-halving-random-count').textContent = halvingRandomCell + '/10';
+                } else {
+                    clearInterval(halvingRandomInterval);
+                    demoRunning = false;
+                }
+            }, 300);
+            demoIntervals.push(halvingRandomInterval);
+        }
+
+        function resetDemo() {
+            demoIntervals.forEach(interval => clearInterval(interval));
+            demoIntervals = [];
+            demoRunning = false;
+            
+            initializeDemo();
+            
+            document.getElementById('demo-grid-count').textContent = '0/25';
+            document.getElementById('demo-grid-best').textContent = '-';
+            document.getElementById('demo-random-count').textContent = '0/10';
+            document.getElementById('demo-random-best').textContent = '-';
+            document.getElementById('demo-halving-grid-count').textContent = '0/25';
+            document.getElementById('demo-halving-grid-best').textContent = '-';
+            document.getElementById('demo-halving-random-count').textContent = '0/10';
+            document.getElementById('demo-halving-random-best').textContent = '-';
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            initializeVisuals();
+            initializeDemo();
+        });
+    </script>
+</body>
+</html>
